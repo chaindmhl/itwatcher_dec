@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darknet Training</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <!-- Custom CSS (optional) -->
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+
+    <style>
+        body, html {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+        }
+
+        .form-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            margin-bottom: 15px;
+        }
+
+        .btn-submit {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark w-100">
+    <a class="navbar-brand mx-auto" href="#">YOLOv4-Darknet Training</a>
+</nav>
+
+<div class="form-container">
+    <form action="{% url 'train' %}" method="post">
+        {% csrf_token %}
+        <h1>Training Form</h1>
+        
+        <div class="form-group">
+            <label for="data_path">Data Path:</label>
+            <input type="text" class="form-control" id="data_path" name="data_path" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="cfg_path">Config Path:</label>
+            <input type="text" class="form-control" id="cfg_path" name="cfg_path" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="weight_path">Weight Path:</label>
+            <input type="text" class="form-control" id="weight_path" name="weight_path" required>
+        </div>
+
+        <!-- Add other input fields as needed -->
+        
+        <button type="submit" class="btn btn-primary btn-submit">Train</button>
+    </form>
+</div>
+
+<!-- Bootstrap JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

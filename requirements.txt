@@ -1,0 +1,11 @@
+tensorflow==2.15.0
+opencv-python
+lxml
+tqdm
+absl-py
+matplotlib
+easydict
+pillow
+
+# sudo apt-get install ffmpeg
+# pip install moviepy

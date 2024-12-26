@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Stream</title>
+</head>
+<body>
+    <h1>Live Video Stream</h1>
+    <div id="video-container">
+        <img id="video-stream" src="" alt="Video Stream">
+    </div>
+
+    <script>
+        function updateVideoStream() {
+            var videoElement = document.getElementById("video-stream");
+            videoElement.src = "/process_lpd_comb";  // Endpoint URL to get the video stream
+        }
+
+        // Update video stream every second
+        setInterval(updateVideoStream, 1000);
+    </script>
+</body>
+</html>

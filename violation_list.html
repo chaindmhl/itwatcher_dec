@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Ensure the body has enough padding-top to prevent content from being hidden under the navbar */
+        body {
+            padding-top: 70px; /* Adjust according to your navbar height */
+        }
+
+        .navbar {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000; /* Ensure navbar is above other content */
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #5c5353;
+            margin-top: 20px; /* Adjust margin for better spacing */
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0; /* Stick to the top */
+            z-index: 1; /* Ensure it's above other content */
+        }
+
+        img {
+            max-width: 100px;
+            display: block;
+            margin: 0 auto; /* Center-align the images */
+        }
+
+        .editable-container {
+            position: relative;
+        }
+
+        .edit-btn {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+        }
+
+        .button-container a {
+            margin-bottom: 10px; /* Add your desired margin value here */
+            margin-right: 5px; /* Adjust spacing between buttons */
+        }
+    </style>
+    <title>Violation Logs</title>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    <a class="navbar-brand" href="http://{{ip_address}}:8000/my-url/">iTWatcher</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'view_camera_map'%}">View Camera Map</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Logout</a>
+            </li>
+            <!-- Add more links for other views here -->
+        </ul>
+    </div>
+</nav>
+    
+<div class="container">
+    <div class="row mt-3">
+        <div class="col-md-3">
+            <input type="text" id="searchPlateNumber" class="form-control" placeholder="Search by Plate Number..">
+        </div>
+        <div class="col-md-3">
+            <input type="text" id="searchViolation" class="form-control" placeholder="Search by Violation..">
+        </div>
+        <div class="col-md-3">
+            <input type="text" id="searchDate" class="form-control" placeholder="Search by Date/Time..">
+        </div>
+        <div class="col-md-3">
+            <input type="text" id="searchVideoFile" class="form-control" placeholder="Search by Video File..">
+        </div>
+    </div>
+</div>
+
+{% if vio_logs %}
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>TIME FRAME</th>
+            <th>VIDEO FILE</th>
+            <th>VEHICLE IMAGE</th>
+            <th>VEHICLE TYPE</th>
+            <th>VEHICLE COLOR</th>
+            <th>PLATE IMAGE</th>
+            <th>PLATE NUMBER</th>
+            <th>VIOLATION</th>
+            <th>DETAILS</th>
+        </tr>
+    </thead>
+    <tbody id="logsTable">
+        {% for log in vio_logs|dictsortreversed:"timestamp" %}
+            <tr>
+                <td>{{ log.timestamp }}</td>
+                <td>{{ log.video_file }}</td>
+                <td><img src="{{ log.vehicle_image.url }}" alt="Vehicle Image" width="100"></td>
+                <td>{{ log.vehicle_type }}</td>
+                <td>{{ log.vehicle_color }}</td>
+                <td><img src="{{ log.plate_image.url }}" alt="Plate Image" width="100"></td>
+                <td>
+                    <div class="editable-container">
+                        <span class="editable-plate-number" contenteditable="true" data-log-id="{{ log.id }}">
+                            {{ log.plate_number }}
+                        </span>
+                        <button class="btn btn-sm btn-primary edit-btn">Edit</button>
+                        <button class="btn btn-sm btn-success save-btn" style="display: none;">Save</button>
+                    </div>
+                </td>
+                <td contenteditable="false" class="editable-violation" data-log-id="{{ log.id }}">{{ log.violation }}</td>
+                <td>
+                    <a href="{% url 'view_violationframe' log_id=log.id %}" class="btn btn-primary btn-sm">
+                    Show Frame
+                    </a>
+                    <a href="{% url 'generate_report' log_id=log.id %}" class="btn btn-success btn-sm">
+                        Download Report
+                    </a>
+                    <a href="{% url 'download_clip' log_id=log.id %}" class="btn btn-warning btn-sm">
+                        Download Clip
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p>No Beating the Red Light Violation Logs Available.</p>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var editableContainers = document.querySelectorAll('.editable-container');
+
+        editableContainers.forEach(function (container) {
+            var editablePlateNumber = container.querySelector('.editable-plate-number');
+            var editBtn = container.querySelector('.edit-btn');
+            var saveBtn = container.querySelector('.save-btn');
+
+            // Ensure initial content is not empty or only whitespace
+            if (!editablePlateNumber.textContent.trim()) {
+                editablePlateNumber.innerHTML = '&nbsp;'; // Set non-breaking space
+            }
+
+            editBtn.addEventListener('click', function () {
+                // Ensure content is not empty or only whitespace before editing
+                if (!editablePlateNumber.textContent.trim()) {
+                    editablePlateNumber.innerHTML = '&nbsp;'; // Set non-breaking space
+                }
+
+                editablePlateNumber.contentEditable = 'true';
+                editablePlateNumber.focus();
+                editBtn.style.display = 'none';
+                saveBtn.style.display = 'inline-block';
+            });
+
+            saveBtn.addEventListener('click', function () {
+                // Extract the updated plate number
+                var updatedPlateNumber = editablePlateNumber.textContent.trim();
+
+                // Send updated plate number to server (via AJAX or form submission)
+
+                // Example AJAX using Fetch API
+                fetch('/update-plate-number/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        log_id: editablePlateNumber.dataset.logId,
+                        plate_number: updatedPlateNumber
+                    })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Optionally update UI or notify user of successful update
+                    } else {
+                        // Handle errors or notify user of failure
+                    }
+                });
+
+                // Update UI
+                editablePlateNumber.contentEditable = 'false';
+                editBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+            });
+        });
+
+        // Search and filter functionality
+        var searchPlateNumber = document.getElementById('searchPlateNumber');
+        var searchViolation = document.getElementById('searchViolation');
+        var searchDate = document.getElementById('searchDate');
+        var searchVideoFile = document.getElementById('searchVideoFile');
+
+        searchPlateNumber.addEventListener('keyup', filterTable);
+        searchViolation.addEventListener('keyup', filterTable);
+        searchDate.addEventListener('keyup', filterTable);
+        searchVideoFile.addEventListener('keyup', filterTable);
+
+        function filterTable() {
+            var filterPlateNumber = searchPlateNumber.value.toLowerCase();
+            var filterViolation = searchViolation.value.toLowerCase();
+            var filterDate = searchDate.value.toLowerCase();
+            var filterVideoFile = searchVideoFile.value.toLowerCase();
+            var table = document.getElementById('logsTable');
+            var rows = table.getElementsByTagName('tr');
+
+            for (var i = 0; i < rows.length; i++) {
+                var cols = rows[i].getElementsByTagName('td');
+                var plateNumber = cols[6] ? cols[6].textContent.toLowerCase() : "";
+                var violation = cols[7] ? cols[7].textContent.toLowerCase() : "";
+                var date = cols[0] ? cols[0].textContent.toLowerCase() : "";
+                var videoFile = cols[1] ? cols[1].textContent.toLowerCase() : "";
+                
+                var matchedPlateNumber = plateNumber.indexOf(filterPlateNumber) > -1;
+                var matchedViolation = violation.indexOf(filterViolation) > -1;
+                var matchedDate = date.indexOf(filterDate) > -1;
+                var matchedVideoFile = videoFile.indexOf(filterVideoFile) > -1;
+
+                rows[i].style.display = (matchedPlateNumber && matchedViolation && matchedDate && matchedVideoFile) ? '' : 'none';
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

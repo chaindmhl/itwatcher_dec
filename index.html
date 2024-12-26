@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>iTWatcher</title>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}" />
+  <link rel="stylesheet" href="{% static 'style.css' %}" />
+  <!-- Font Awesome CDN Link -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <style>
+   /* Position the download message behind the main content */
+  #download-message {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0; /* Ensures it's behind content but still visible */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    color: white; /* White text color */
+    padding: 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <ul>
+        <li>
+          <a href="{% url 'my-view' %}" class="logo">
+            <img src="{% static 'itwatcher.jpg' %}" alt="itwatcher logo">
+            <span class="nav-item">iTWatcher</span>
+          </a>
+        </li>
+        <li><a href="{% url 'my-view' %}"><i class="fas fa-home"></i><span class="nav-item">Home</span></a></li>
+        <li><a href="{% url 'display_plates' %}"><i class="fas fa-clipboard-list"></i><span class="nav-item">LPR Logs</span></a></li>
+        <li><a href="{% url 'vehicle_log_list' %}"><i class="fas fa-clipboard-list"></i><span class="nav-item">Vehicle Count Logs</span></a></li>
+        <li><a href="{% url 'violation' %}"><i class="fas fa-clipboard-list"></i><span class="nav-item">Violation Logs</span></a></li>
+        <li><a href="{% url 'login' %}" class="logout"><i class="fas fa-sign-out-alt"></i><span class="nav-item">Log out</span></a></li>
+      </ul>
+    </nav>
+
+    <section class="main">
+      <div class="main-top">
+        <h1>Models</h1>
+        <i class="fas fa-user-cog"></i>
+      </div>
+      <div class="main-skills">
+        <div class="lpr">
+          <img src="{% static 'lpr.png' %}" class="small-image">
+          <h3>License Plate Recognition</h3>
+          <button onclick="window.location.href='http://{{ip_address}}:8000/lpr/'">Select</button>
+        </div>
+        <div class="track">
+          <img src="{% static 'vehicle.png' %}" class="small-image">
+          <h3>Tracking and Counting</h3>
+          <button onclick="window.location.href='http://{{ip_address}}:8000/track/'">Select</button>
+        </div>
+        <div class="violation">
+          <img src="{% static 'vio.jpg' %}" class="small-image">
+          <h3>Violation Detection</h3>
+          <button onclick="window.location.href='http://{{ip_address}}:8000/violation/'">Select</button>
+        </div>
+      </div>
+
+      <section class="main-course">
+        <h1>Applications</h1>
+        <div class="course-box">
+          <div class="course">
+            <div class="box">
+              <h3>Upload Video</h3>
+              <button type="button" class="btn" onclick="openPopup()">Upload</button>
+              <div class="popup" id="upload-status">
+                <form id="upload-form" enctype="multipart/form-data" method="post" action="http://{{ip_address}}:8000/tracking/video/">
+                  <h2>Upload Video</h2>
+                  <input type="file" name="file" required>
+                  {% csrf_token %}
+                  <button type="submit" id="upload-button">Upload Video</button>
+                  <button type="button" onclick="closePopup()">Close</button>    
+                </form>
+                <div id="upload-message" style="display: none;">Video uploaded</div>
+              </div>
+              <i class="fas fa-upload"></i>
+            </div>
+            <script>
+              let popup = document.getElementById("upload-status");
+              function openPopup() {
+                popup.classList.add("open-popup");
+              }
+              function closePopup() {
+                popup.classList.remove("open-popup");
+              }
+
+              // AJAX for video upload
+              document.getElementById('upload-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                var formData = new FormData(this);
+                $.ajax({
+                  url: this.action,
+                  type: "POST",
+                  data: formData,
+                  contentType: false,
+                  processData: false,
+                  success: function(response) {
+                    document.getElementById('upload-message').style.display = 'block';
+                  },
+                  error: function(error) {
+                    console.error(error);
+                  }
+                });
+              });
+            </script>
+
+            <div class="box">
+              <h3>Train with YOLOv4-Darknet</h3>
+              <button type="button" class="btn" onclick="openPopupTrain()">Train</button>
+              <div class="popuptrain" id="train">
+                <form action="{% url 'train' %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <h1>YOLOv4-Darknet Training</h1>
+                  <label for="data_path">Data Path:</label>
+                  <input type="file" id="data_path" name="data_path" accept=".data" required><br>
+                  <label for="cfg_path">Config Path:</label>
+                  <input type="file" id="cfg_path" name="cfg_path" accept=".cfg" required><br>
+                  <label for="weight_path">Weight Path:</label>
+                  <input type="file" id="weight_path" name="weight_path" accept=".weights, .137" required><br>
+                  <button type="submit">Train</button>
+                  <button type="button" onclick="closePopupTrain()">Close</button> 
+                </form>
+              </div>
+              <i class="fas fa-chart-line"></i>
+            </div>
+
+            <script>
+              let popupTrain = document.getElementById("train");
+              function openPopupTrain() {
+                popupTrain.classList.add("open-popup");
+              }
+              function closePopupTrain() {
+                popupTrain.classList.remove("open-popup");
+              }
+            </script>
+
+            <div class="box">
+              <h3>Download from NVR</h3>
+              <button type="button" class="btn" onclick="openPopupNVR()">Download</button>
+              <div class="popupnvr" id="nvr-download">
+                <form id="downloadForm" method="post" action="{% url 'downloadrequest-list-create' %}" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <h1>Download from NVR</h1>
+                  {% if error_message %}
+                    <div id="error-message" class="alert alert-danger mt-3" role="alert">{{ error_message }}</div>
+                  {% endif %}
+                  {% if filename_exists %}
+                    <div id="filename-exists" class="alert alert-danger mt-3" role="alert">{{ filename_exists }}</div>
+                  {% endif %}
+                  <div class="form-group">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" class="form-control" name="start_date" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="channel">Channel:</label>
+                    <select class="form-control" name="channel" required>
+                      <option value="101">101</option>
+                      <option value="201">201</option>
+                      <option value="301">301</option>
+                      <option value="401">401</option>
+                      <option value="501">501</option>
+                      <option value="601">601</option>
+                      <option value="701">701</option>
+                      <option value="801">801</option>
+                    </select>
+                  </div>
+                  <button type="button" id="downloadButton" onclick="confirmAndSubmit()">Download</button>
+                  <button type="button" onclick="closePopupNVR()">Close</button>
+                </form>
+              </div>
+              <i class="fas fa-download"></i>
+            </div>
+             <!-- Downloading message -->
+            <div id="download-message">
+              <div class="spinner"></div>
+              <p>Downloading in Progress. Please do not refresh the page or perform any actions in this tab.</p>
+            </div>
+
+            <script>
+              let popupNVR = document.getElementById("nvr-download");
+              function openPopupNVR() {
+                popupNVR.classList.add("open-popup");
+              }
+
+              function confirmAndSubmit() {
+                let form = document.getElementById("downloadForm");
+                var startDate = form.elements['start_date'].value;
+                var channel = form.elements['channel'].value;
+
+                if (!startDate || !channel) {
+                  alert('No data has been selected.');
+                  return;
+                }
+
+                if (confirm('Are you sure you want to download?')) {
+                  form.submit();
+                }
+                // Show the download in progress message
+                document.getElementById("download-message").style.display = "block";
+              }
+
+              function closePopupNVR() {
+                popupNVR.classList.remove("open-popup");
+              }
+            </script>
+
+          </div>
+        </div>
+      </section>
+    </section>
+  </div>
+</body>
+</html>

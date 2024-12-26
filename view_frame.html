@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>View Frame Image</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .navbar {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-top: 100px; /* Adjust this value to ensure the heading is fully visible */
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .centered-h1 {
+            text-align: center;
+            margin-top: 20px; /* Adjust the margin as needed */
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    <a class="navbar-brand" href="http://{{ip_address}}:8000/my-url/">iTWatcher</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'display_plates' %}">View Plate Logs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="content">
+    <div class="centered-h1">
+        <h1>Frame Image</h1>
+    </div>
+
+    {% if plate_log %}
+        <img src="{{ plate_log.frame_image.url }}" alt="Frame Image" width="1000">
+    {% else %}
+        <p>No frame image available.</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

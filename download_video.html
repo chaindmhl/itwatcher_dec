@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Video From NVR</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+    <script>
+        function confirmAndSubmit() {
+            var form = document.getElementById('downloadForm');
+            var startDate = form.elements['start_date'].value;
+            var channel = form.elements['channel'].value;
+
+            if (!startDate || !channel) {
+                alert('No data has been selected.');
+                return;
+            }
+
+            if (confirm('Are you sure you want to download?')) {
+                // Show the downloading message
+                document.getElementById('downloading-message').style.display = 'block';
+
+                // Submit the form
+                form.submit();
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Download Video from NVR</h2>
+        
+        <form id="downloadForm" method="post" action="{% url 'downloadrequest-list-create' %}" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            {% if error_message %}
+                <div id="error-message" class="alert alert-danger mt-3" role="alert">
+                    {{ error_message }}
+                </div>
+            {% endif %}
+
+            {% if filename_exists %}
+                <div id="filename-exists" class="alert alert-danger mt-3" role="alert">
+                    {{ filename_exists }}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" class="form-control" name="start_date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="channel">Channel:</label>
+                <select class="form-control" name="channel" required>
+                    <option value="101">101</option>
+                    <option value="201">201</option>
+                    <option value="301">301</option>
+                    <option value="401">401</option>
+                    <option value="501">501</option>
+                    <option value="601">601</option>
+                    <option value="701">701</option>
+                    <option value="801">801</option>
+                </select>
+            </div>
+            
+            <button type="button" class="btn btn-primary" onclick="confirmAndSubmit()">Download</button>
+        </form>
+
+        <!-- Message displayed while downloading -->
+        <div id="downloading-message" class="alert alert-info mt-3" role="alert" style="display: none;">
+            Downloading in Progress. Please do not refresh the page or perform any actions in this tab.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Clip Warning</title>
+    {% load static %} <!-- Load the static tag library -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="alert alert-warning text-center" role="alert">
+            {{ message }}
+        </div>
+        <div class="text-center mt-3">
+            <a href="{% url 'violation' %}" class="btn btn-primary">Go Back to Violation Logs</a>
+        </div>
+    </div>
+</body>
+</html>
