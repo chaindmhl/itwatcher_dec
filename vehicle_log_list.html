@@ -1,16 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>iTWatcher</title>
-    <!-- Add your CSS and JS files here -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"-->
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}"> 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Vehicle Count Logs</title>
 </head>
 <body>
 
@@ -22,9 +16,6 @@
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="http://{{ip_address}}:8000/my-url/">Upload Video</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="{% url 'login' %}">Logout</a>
                 </li>    
                 <!-- Add more links for other views here -->
@@ -34,7 +25,6 @@
         </div>
     </nav>
 
-    <h1>Track and Count Logs</h1>
     <table class="table table-bordered table-sm table-responsive-sm">
         <tr>
             <th class="text-center">Timestamp</th>
