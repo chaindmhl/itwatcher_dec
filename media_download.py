@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-# 2023-05-17
-
 # ====== Parameters ======
 user_name = 'admin'
 user_password = 'Nopassword1234'
