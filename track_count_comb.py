@@ -332,7 +332,7 @@ class Track_Count():
                 oval_count = cnt
 
         current_date = date.today()
-        existing_log = VehicleLog.objects.filter(date=current_date).first()
+        existing_log = VehicleLog.objects.filter(filename=self._video).first()
 
         if existing_log:
             existing_log.total_count = self.total_counter
@@ -345,7 +345,7 @@ class Track_Count():
         else:
             vehicle_log = VehicleLog.objects.create(
                 date=current_date,
-                filename=self._file_counter_log_name,
+                filename=self._video,
                 total_count=self.total_counter,
                 hwy_count=hwy_count,
                 msu_count=msu_count,
