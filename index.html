@@ -89,7 +89,7 @@
         <div class="course-box">
           <div class="course">
             <div class="box">
-              <h3>Upload Video</h3>
+              <h3>Upload Video Path in Database</h3>
               <button type="button" class="btn" onclick="openPopup()">Upload</button>
               <div class="popup" id="upload-status">
                 <form id="upload-form" enctype="multipart/form-data" method="post" action="http://{{ip_address}}:8000/tracking/video/">
@@ -163,7 +163,7 @@
             </script>
 
             <div class="box">
-              <h3>Download from NVR</h3>
+              <h3>Download Video from NVR</h3>
               <button type="button" class="btn" onclick="openPopupNVR()">Download</button>
               <div class="popupnvr" id="nvr-download">
                 <form id="downloadForm" method="post" action="{% url 'downloadrequest-list-create' %}" enctype="multipart/form-data">
