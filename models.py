@@ -3,19 +3,40 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.html import format_html
 from PIL import Image
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from django.core.files import File
+from tracking.utils.load_config import load_config
 
 
+# Load the configuration once
+_, processed_defaults, last_processed_defaults = load_config()
 
-# Create your models here.
+
 class Video(models.Model):
     file = models.FileField(upload_to="videos/", blank=True)
 
-class NVRVideo(models.Model):
-    video_nvr = models.FileField(upload_to='nvr_videos', default='nvr_videos/video.mp4')
+    # Explicitly define the fields for processed status
+    processed_tc_trike = models.BooleanField(default=processed_defaults.get("processed_tc_trike", False))
+    processed_tc_catchall = models.BooleanField(default=processed_defaults.get("processed_tc_catchall", False))
+    processed_tc_itwatcher = models.BooleanField(default=processed_defaults.get("processed_tc_itwatcher", False))
+    processed_lpr_trike = models.BooleanField(default=processed_defaults.get("processed_lpr_trike", False))
+    processed_lpr_catchall = models.BooleanField(default=processed_defaults.get("processed_lpr_catchall", False))
+    processed_lpr_itwatcher = models.BooleanField(default=processed_defaults.get("processed_lpr_itwatcher", False))
+    processed_brl = models.BooleanField(default=processed_defaults.get("processed_brl", False))
+    processed_bpl = models.BooleanField(default=processed_defaults.get("processed_bpl", False))
+    processed_os = models.BooleanField(default=processed_defaults.get("processed_os", False))
 
+    # Explicitly define the fields for last processed timestamps
+    last_processed_tc_trike = models.DateTimeField(null=True, blank=True, default=last_processed_defaults.get("last_processed_tc_trike"))
+    last_processed_tc_catchall = models.DateTimeField(null=True, blank=True, default=last_processed_defaults.get("last_processed_tc_catchall"))
+    last_processed_tc_itwatcher = models.DateTimeField(null=True, blank=True, default=last_processed_defaults.get("last_processed_tc_itwatcher"))
+    last_processed_lpr_trike = models.DateTimeField(null=True, blank=True, default=last_processed_defaults.get("last_processed_lpr_trike"))
+    last_processed_lpr_catchall = models.DateTimeField(null=True, blank=True, default=last_processed_defaults.get("last_processed_lpr_catchall"))
+    last_processed_lpr_itwatcher = models.DateTimeField(null=True, blank=True, default=last_processed_defaults.get("last_processed_lpr_itwatcher"))
+    last_processed_brl = models.DateTimeField(null=True, blank=True, default=last_processed_defaults.get("last_processed_brl"))
+    last_processed_bpl = models.DateTimeField(null=True, blank=True, default=last_processed_defaults.get("last_processed_bpl"))
+    last_processed_os = models.DateTimeField(null=True, blank=True, default=last_processed_defaults.get("last_processed_os"))
 
 class BasenameField(models.CharField):
     def to_python(self, value):
@@ -54,7 +75,7 @@ class VehicleLog(models.Model):
     date = models.DateField(default=timezone.now)
     start_time = models.TimeField(default='00:00:00')
     end_time = models.TimeField(default='00:00:00')
-    filename = models.CharField(max_length=255, null=True)
+    filename = BasenameField(max_length=255, null=True)
     total_count = models.PositiveIntegerField(null=True)
     hwy_count = models.PositiveIntegerField(null=True)
     msu_count = models.PositiveIntegerField(null=True)
@@ -184,8 +205,15 @@ class ColorLog(models.Model):
     display_vehicle_image.short_description = "Vehicle Image"
     display_frame_image.short_description = "Frame Image"
 
+def get_time_with_offset():
+    now = timezone.now()
+    # Add 8 hours to the current time
+    return (now + timedelta(hours=8)).time()
+
 class ViolationLog(models.Model):
-    timestamp = models.DateTimeField(default=timezone.now)
+    # timestamp = models.DateTimeField(default=timezone.now)
+    timestamp_date = models.DateField(default=timezone.now)  # Stores only the date
+    timestamp_time = models.TimeField(default=get_time_with_offset)
     video_file = BasenameField(max_length=255, null=True)
     full_video_path = models.CharField(max_length=1024, null=True, blank=True)  # New field for video
     frame_number = models.IntegerField(null=False, default=0)  # Add a frame_number field
@@ -198,7 +226,7 @@ class ViolationLog(models.Model):
     frame_image = models.ImageField(upload_to='frame_images/', null=True)
 
     def __str__(self):
-        return f"Violation Log for {self.timestamp}"
+        return f"Violation Log for {self.timestamp_date}-{self.timestamp_time}"
     
     def display_plate_image(self):
 
